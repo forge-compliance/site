@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,16 +16,26 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
         /* Simple animation for message box */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .message-box {
             animation: fadeIn 0.3s ease-out;
         }
     </style>
 </head>
+
 <body class="bg-slate-50 text-slate-800">
 
     <!-- Firebase SDKs -->
@@ -36,7 +47,7 @@
         // --- Firebase & App Config ---
         let db, auth;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id-forge';
-        
+
         // --- UI Elements ---
         const waitlistForm = document.getElementById('waitlist-form');
         const emailInput = document.getElementById('email-input');
@@ -48,7 +59,7 @@
             try {
                 // Set log level for debugging
                 setLogLevel('Debug');
-                
+
                 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -83,9 +94,8 @@
         // --- Show Messages ---
         function showMessage(message, type = 'success') {
             messageBox.textContent = message;
-            messageBox.className = `message-box p-3 rounded-md text-sm font-medium mb-4 ${
-                type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`;
+            messageBox.className = `message-box p-3 rounded-md text-sm font-medium mb-4 ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`;
             messageBox.classList.remove('hidden');
         }
 
@@ -143,13 +153,15 @@
             <div class="hidden md:flex items-center space-x-6">
                 <a href="#product" class="text-slate-300 hover:text-white transition-colors">Product</a>
                 <a href="#team" class="text-slate-300 hover:text-white transition-colors">Team</a>
-                <a href="#signup" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors">
+                <a href="#signup"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors">
                     Join Waitlist
                 </a>
             </div>
             <!-- Mobile menu button (optional) -->
             <div class="md:hidden">
-                <a href="#signup" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                <a href="#signup"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
                     Sign Up
                 </a>
             </div>
@@ -165,9 +177,11 @@
                     The OS for Defense & Aerospace Compliance
                 </h1>
                 <p class="mt-6 text-lg md:text-xl text-slate-300 max-w-3xl mx-auto">
-                    Forge Compliance automates ITAR and AS9100 certification, opening the door for U.S. manufacturers to build for the nation's most critical programs.
+                    Forge Compliance automates ITAR and AS9100 certification, opening the door for U.S. manufacturers to
+                    build for the nation's most critical programs.
                 </p>
-                <a href="#signup" class="mt-10 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-colors">
+                <a href="#signup"
+                    class="mt-10 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-colors">
                     Request Early Access
                 </a>
             </div>
@@ -182,13 +196,19 @@
                         A Compliance Bottleneck
                     </p>
                     <p class="mt-6 text-lg leading-8 text-gray-700">
-                        The U.S. defense supply chain depends on thousands of small and mid-sized contract manufacturers—yet many can’t participate in aerospace and defense programs because qualifying for the necessary certifications is <strong>slow, expensive, and opaque.</strong>
+                        The U.S. defense supply chain depends on thousands of small and mid-sized contract
+                        manufacturers—yet many can’t participate in aerospace and defense programs because qualifying
+                        for the necessary certifications is <strong>slow, expensive, and opaque.</strong>
                     </p>
                     <p class="mt-6 text-lg leading-8 text-gray-600">
-                        To supply critical systems, manufacturers must comply with ITAR export controls and AS9100 quality management standards. For small shops, these are daunting. Compliance can cost tens of thousands of dollars and hundreds of staff hours each year—an unsustainable burden for a 50-person operation.
+                        To supply critical systems, manufacturers must comply with ITAR export controls and AS9100
+                        quality management standards. For small shops, these are daunting. Compliance can cost tens of
+                        thousands of dollars and hundreds of staff hours each year—an unsustainable burden for a
+                        50-person operation.
                     </p>
                     <p class="mt-6 text-lg leading-8 text-gray-600">
-                        The result is a brittle industrial base concentrated among a few large suppliers, limiting the resilience of US-based supply chains.
+                        The result is a brittle industrial base concentrated among a few large suppliers, limiting the
+                        resilience of US-based supply chains.
                     </p>
                 </div>
             </div>
@@ -203,25 +223,27 @@
                         Radical Efficiency. Real-Time Compliance.
                     </p>
                     <p class="mt-6 text-lg leading-8 text-gray-700 max-w-3xl mx-auto">
-                        We're building tools that automate documentation, simplify audits, and provide ongoing visibility into compliance status, allowing smaller firms to meet A&D requirements without needing in-house legal or quality teams.
+                        We're building tools that automate documentation, simplify audits, and provide ongoing
+                        visibility into compliance status, allowing smaller firms to meet A&D requirements without
+                        needing in-house legal or quality teams.
                     </p>
                 </div>
 
                 <!-- Product Demo/Features -->
-                <div class="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-16 m-16">
                     <!-- Product Demo -->
-                    <div class="bg-slate-800 rounded-lg shadow-xl p-8 lg:p-12">
-                        <h3 class="text-2xl font-bold text-white mb-4">Product Demo: Mobile Part Verification</h3>
+                    <div class="bg-slate-800 rounded-lg shadow-xl p-8 lg:p-12 items-center">
+                        <h3 class="text-2xl font-bold text-white mb-4">Problem Introduction</h3>
                         <p class="text-slate-300 mb-6">
-                            Our flagship mobile app allows manufacturers to scan 3D parts directly on the factory floor. Instantly evaluate components against complex compliance constraints using your CAD specifications or our intuitive low-code checks.
+                            The U.S. defense supply chain depends on thousands of small and mid-sized contract
+                            manufacturers—yet many can’t participate in aerospace and defense programs because
+                            qualifying
+                            for the necessary certifications is slow, expensive, and opaque.
                         </p>
-                        <!-- Demo Video Placeholder -->
-                        <div class="aspect-video bg-slate-700 rounded-lg flex items-center justify-center relative overflow-hidden">
-                            <span class="text-slate-400 text-lg font-medium">Product Demo Video</span>
-                            <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                                <!-- Play Button SVG -->
-                                <svg class="w-20 h-20 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                            </div>
+                        <div style="position: relative; width: 100%; padding-top: 56.25%; overflow: hidden;">
+                            <iframe src="https://drive.google.com/file/d/1uiAKM4BhNahKROfD36B6gCQ_y0V6KLXA/preview"
+                                allow="autoplay"
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
                         </div>
                     </div>
 
@@ -230,40 +252,61 @@
                         <div class="flex">
                             <!-- Icon -->
                             <div class="flex-shrink-0">
-                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
+                                <div
+                                    class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
                                     <!-- Heroicon: document-text -->
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                    </svg>
                                 </div>
                             </div>
                             <div class="ml-4">
                                 <dt class="text-lg leading-6 font-bold text-gray-900">Automate Documentation</dt>
-                                <dd class="mt-2 text-base text-gray-600">Stop drowning in paperwork. Our system generates and manages the hundreds of pages required for AS9100 quality manuals and ITAR compliance.</dd>
+                                <dd class="mt-2 text-base text-gray-600">Stop drowning in paperwork. Our system
+                                    generates and manages the hundreds of pages required for AS9100 quality manuals and
+                                    ITAR compliance.</dd>
                             </div>
                         </div>
                         <div class="flex">
                             <!-- Icon -->
                             <div class="flex-shrink-0">
-                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
+                                <div
+                                    class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
                                     <!-- Heroicon: shield-check -->
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.314-.213-2.622-.602-3.852A11.959 11.959 0 0115 2.714v.001z" /></svg>
+                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.314-.213-2.622-.602-3.852A11.959 11.959 0 0115 2.714v.001z" />
+                                    </svg>
                                 </div>
                             </div>
                             <div class="ml-4">
                                 <dt class="text-lg leading-6 font-bold text-gray-900">Simplify Audits</dt>
-                                <dd class="mt-2 text-base text-gray-600">Face audits with confidence. Forge provides a clear, auditable trail for every part and process, flagging non-compliance issues in real-time.</dd>
+                                <dd class="mt-2 text-base text-gray-600">Face audits with confidence. Forge provides a
+                                    clear, auditable trail for every part and process, flagging non-compliance issues in
+                                    real-time.</dd>
                             </div>
                         </div>
                         <div class="flex">
                             <!-- Icon -->
                             <div class="flex-shrink-0">
-                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
+                                <div
+                                    class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
                                     <!-- Heroicon: rocket-launch -->
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v.01l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-.01-.01a6 6 0 017.38-5.84l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l.01.01z" /></svg>
+                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.59 14.37a6 6 0 01-5.84 7.38v.01l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-.01-.01a6 6 0 017.38-5.84l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l.01.01z" />
+                                    </svg>
                                 </div>
                             </div>
                             <div class="ml-4">
                                 <dt class="text-lg leading-6 font-bold text-gray-900">Unlock the Industrial Base</dt>
-                                <dd class="mt-2 text-base text-gray-600">By lowering the barrier to entry, we're opening the door for thousands of capable manufacturers to support critical programs and strengthen America’s resilience.</dd>
+                                <dd class="mt-2 text-base text-gray-600">By lowering the barrier to entry, we're opening
+                                    the door for thousands of capable manufacturers to support critical programs and
+                                    strengthen America’s resilience.</dd>
                             </div>
                         </div>
                     </div>
@@ -277,19 +320,25 @@
                 <div class="text-center">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Meet Our Team</h2>
                     <p class="mt-4 text-lg leading-8 text-gray-700 max-w-3xl mx-auto">
-                        We are a team of engineers, entrepreneurs, and product leaders from Harvard's MS/MBA program, united by a mission to strengthen America's industrial and defense capabilities.
+                        We are a team of engineers, entrepreneurs, and product leaders from Harvard's MS/MBA program,
+                        united by a mission to strengthen America's industrial and defense capabilities.
                     </p>
                 </div>
                 <div class="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    
+
                     <!-- Team Member Card: Nathan Alam -->
                     <div class="bg-slate-50 rounded-lg shadow-lg p-6">
                         <h3 class="text-lg font-bold text-gray-900">Nathan Alam</h3>
                         <p class="text-sm font-semibold text-blue-600 mb-3">AI & Engineering</p>
                         <p class="text-sm text-gray-600 mb-4">
-                            Brings a unique blend of engineering rigor and AI-driven innovation, having built custom AI agent platforms for national security applications and developed high-performance networking drivers for satellite communications at Amazon. His background in chemical and biological engineering, coupled with computer science and health policy minors, positions him to bridge technical execution with strategic, cross-functional problem-solving.
+                            Brings a unique blend of engineering rigor and AI-driven innovation, having built custom AI
+                            agent platforms for national security applications and developed high-performance networking
+                            drivers for satellite communications at Amazon. His background in chemical and biological
+                            engineering, coupled with computer science and health policy minors, positions him to bridge
+                            technical execution with strategic, cross-functional problem-solving.
                         </p>
-                        <a href="https://www.linkedin.com/in/nathan-alam" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <a href="https://www.linkedin.com/in/nathan-alam" target="_blank" rel="noopener noreferrer"
+                            class="text-sm font-medium text-blue-600 hover:text-blue-800">
                             LinkedIn &rarr;
                         </a>
                     </div>
@@ -299,9 +348,15 @@
                         <h3 class="text-lg font-bold text-gray-900">Tyler Mangini</h3>
                         <p class="text-sm font-semibold text-blue-600 mb-3">Product & Strategy</p>
                         <p class="text-sm text-gray-600 mb-4">
-                            A dual-degree engineering and business leader with deep experience in product strategy, sustainability, and data-driven innovation — having led product teams at Amazon and shaped AI strategies at Activate. His background in mechanical engineering and business management, combined with his work in climate-focused product development and regulatory strategy, makes him a natural leader in ventures requiring both technical execution and market-driven business acumen.
+                            A dual-degree engineering and business leader with deep experience in product strategy,
+                            sustainability, and data-driven innovation — having led product teams at Amazon and shaped
+                            AI strategies at Activate. His background in mechanical engineering and business management,
+                            combined with his work in climate-focused product development and regulatory strategy, makes
+                            him a natural leader in ventures requiring both technical execution and market-driven
+                            business acumen.
                         </p>
-                        <a href="https://www.linkedin.com/in/tyler-mangini/" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <a href="https://www.linkedin.com/in/tyler-mangini/" target="_blank" rel="noopener noreferrer"
+                            class="text-sm font-medium text-blue-600 hover:text-blue-800">
                             LinkedIn &rarr;
                         </a>
                     </div>
@@ -311,7 +366,12 @@
                         <h3 class="text-lg font-bold text-gray-900">Arshaan Ali</h3>
                         <p class="text-sm font-semibold text-blue-600 mb-3">Deep Tech & Manufacturing</p>
                         <p class="text-sm text-gray-600 mb-4">
-                            A deep-tech entrepreneur and process engineer with a track record of scaling manufacturing systems at Tesla and founding a deep-tech startup from the ground up. His hands-on experience in battery development, electrode manufacturing, and factory layout design gives him exceptional insight into operational efficiency, supply chain strategy, and commercialization. He’s skilled at translating technical breakthroughs into scalable business models.
+                            A deep-tech entrepreneur and process engineer with a track record of scaling manufacturing
+                            systems at Tesla and founding a deep-tech startup from the ground up. His hands-on
+                            experience in battery development, electrode manufacturing, and factory layout design gives
+                            him exceptional insight into operational efficiency, supply chain strategy, and
+                            commercialization. He’s skilled at translating technical breakthroughs into scalable
+                            business models.
                         </p>
                         <!-- No LinkedIn provided in prompt -->
                     </div>
@@ -321,7 +381,12 @@
                         <h3 class="text-lg font-bold text-gray-900">Trevor O’Leary</h3>
                         <p class="text-sm font-semibold text-blue-600 mb-3">Hardware & Software Systems</p>
                         <p class="text-sm text-gray-600 mb-4">
-                            Combines hardware engineering, software development, and creative project execution. As a senior software engineer at Tesla and lead electronics designer at Formula Electric, he’s built embedded systems, automated test infrastructure, and custom hardware for automotive and robotics applications. His passion for prototyping, music production, and art reflects a creative, iterative mindset — ideal for ventures that require both technical precision and innovative design.
+                            Combines hardware engineering, software development, and creative project execution. As a
+                            senior software engineer at Tesla and lead electronics designer at Formula Electric, he’s
+                            built embedded systems, automated test infrastructure, and custom hardware for automotive
+                            and robotics applications. His passion for prototyping, music production, and art reflects a
+                            creative, iterative mindset — ideal for ventures that require both technical precision and
+                            innovative design.
                         </p>
                         <!-- No LinkedIn provided in prompt -->
                     </div>
@@ -337,7 +402,8 @@
                     Build What Matters. Faster.
                 </h2>
                 <p class="mt-4 text-lg leading-8 text-slate-300">
-                    We're launching our private beta for select U.S. manufacturers. Sign up to receive updates and request early access to the Forge Compliance platform.
+                    We're launching our private beta for select U.S. manufacturers. Sign up to receive updates and
+                    request early access to the Forge Compliance platform.
                 </p>
 
                 <!-- Message Box -->
@@ -368,4 +434,5 @@
     </footer>
 
 </body>
+
 </html>
