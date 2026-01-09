@@ -4,8 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>
-            Forge Manufacturing - Advanced Testing Equipment for Electronics
-            Manufacturers
+            Forge Compliance - AI-Powered CMMC 2.0 & Revenue Growth
         </title>
         <!-- Load Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
@@ -22,28 +21,61 @@
                 font-family: "Inter", sans-serif;
             }
 
-            /* Simple animation for message box */
+            /* Animations */
             @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes pulse-glow {
+                0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+                50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); }
+            }
+            @keyframes scan {
+                0% { top: 0%; opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { top: 100%; opacity: 0; }
             }
 
-            .message-box {
-                animation: fadeIn 0.3s ease-out;
+            .animate-fade-in {
+                animation: fadeIn 0.6s ease-out forwards;
+            }
+            .animate-delay-100 { animation-delay: 100ms; }
+            .animate-delay-200 { animation-delay: 200ms; }
+            .animate-delay-300 { animation-delay: 300ms; }
+
+            .glow-effect:hover {
+                animation: pulse-glow 2s infinite;
+            }
+
+            .scan-line {
+                position: absolute;
+                width: 100%;
+                height: 2px;
+                background: linear-gradient(to right, transparent, #3b82f6, transparent);
+                animation: scan 2s linear infinite;
+            }
+
+            /* Custom Gradients */
+            .bg-gradient-dark {
+                background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
+            }
+            .text-gradient {
+                background: linear-gradient(to right, #60a5fa, #2dd4bf);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .card-gradient {
+                background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(148, 163, 184, 0.1);
             }
         </style>
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
         <link rel="icon" type="image/jpeg" href="logo.png" />
     </head>
 
-    <body class="bg-slate-50 text-slate-800">
+    <body class="bg-slate-950 text-slate-200 antialiased selection:bg-blue-500 selection:text-white">
         <!-- Firebase SDKs -->
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -61,419 +93,342 @@
                 collection,
             } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            // --- Firebase & App Config ---
             let db, auth;
-            const appId =
-                typeof __app_id !== "undefined"
-                    ? __app_id
-                    : "default-app-id-forge";
+            const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id-forge";
 
-            // --- UI Elements ---
             const waitlistForm = document.getElementById("waitlist-form");
             const emailInput = document.getElementById("email-input");
             const messageBox = document.getElementById("message-box");
             const submitButton = document.getElementById("submit-button");
+            const bottomWaitlistForm = document.getElementById("waitlist-form-bottom");
+            const bottomEmailInput = document.getElementById("email-input-bottom");
+            const bottomSubmitButton = document.getElementById("submit-button-bottom");
+            const bottomMessageBox = document.getElementById("message-box-bottom");
 
-            // --- Firebase Initialization ---
             async function initFirebase() {
                 try {
-                    // Set log level for debugging
-                    setLogLevel("Debug");
-
-                    const firebaseConfig = JSON.parse(
-                        typeof __firebase_config !== "undefined"
-                            ? __firebase_config
-                            : "{}",
-                    );
+                    const firebaseConfig = JSON.parse(typeof __firebase_config !== "undefined" ? __firebase_config : "{}");
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
 
-                    console.log("Firebase initializing...");
-
-                    // Sign in
-                    if (
-                        typeof __initial_auth_token !== "undefined" &&
-                        __initial_auth_token
-                    ) {
-                        console.log("Signing in with custom token...");
+                    if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        console.log("Signing in anonymously...");
                         await signInAnonymously(auth);
                     }
-
-                    // Listen for auth state changes
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            console.log("User is authenticated:", user.uid);
-                        } else {
-                            console.log("User is not authenticated.");
-                        }
-                    });
                 } catch (error) {
                     console.error("Firebase Init Error:", error);
-                    showMessage(
-                        "Error connecting to server. Please try again later.",
-                        "error",
-                    );
                 }
             }
 
-            // --- Show Messages ---
-            function showMessage(message, type = "success") {
-                messageBox.textContent = message;
-                messageBox.className = `message-box p-3 rounded-md text-sm font-medium mb-4 ${
-                    type === "success"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                }`;
-                messageBox.classList.remove("hidden");
+            function showMessage(element, message, type = "success") {
+                element.textContent = message;
+                element.className = `p-3 rounded-md text-sm font-medium mb-4 ${type === "success" ? "bg-green-900/30 text-green-400 border border-green-800" : "bg-red-900/30 text-red-400 border border-red-800"}`;
+                element.classList.remove("hidden");
             }
 
-            // --- Handle Waitlist Submission ---
-            async function handleWaitlistSubmit(event) {
+            async function handleWaitlistSubmit(event, inputElem, btnElem, msgElem) {
                 event.preventDefault();
                 if (!db || !auth.currentUser) {
-                    showMessage(
-                        "Database not connected. Please refresh.",
-                        "error",
-                    );
+                    showMessage(msgElem, "Server connecting...", "error");
                     return;
                 }
-
-                const email = emailInput.value.trim();
+                const email = inputElem.value.trim();
                 if (!email || !email.includes("@")) {
-                    showMessage("Please enter a valid email address.", "error");
+                    showMessage(msgElem, "Please enter a valid email.", "error");
                     return;
                 }
-
-                submitButton.disabled = true;
-                submitButton.textContent = "Submitting...";
-
+                btnElem.disabled = true;
+                btnElem.textContent = "Processing...";
                 try {
-                    // Save to public waitlist collection
-                    const waitlistCollectionPath = `artifacts/${appId}/public/data/waitlist`;
-                    await addDoc(collection(db, waitlistCollectionPath), {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/waitlist`), {
                         email: email,
                         submittedAt: new Date().toISOString(),
                     });
-
-                    console.log("Email added to waitlist:", email);
-                    showMessage(
-                        "Thank you! You've been added to our information list.",
-                        "success",
-                    );
-                    emailInput.value = ""; // Clear input
+                    showMessage(msgElem, "Access requested. We'll be in touch.", "success");
+                    inputElem.value = "";
                 } catch (error) {
-                    console.error("Firestore Error:", error);
-                    showMessage(
-                        "An error occurred. Please try again.",
-                        "error",
-                    );
+                    showMessage(msgElem, "Something went wrong. Try again.", "error");
                 } finally {
-                    submitButton.disabled = false;
-                    submitButton.textContent = "Request Access";
+                    btnElem.disabled = false;
+                    btnElem.textContent = "Request Access";
                 }
             }
 
-            // --- Event Listeners ---
-            waitlistForm.addEventListener("submit", handleWaitlistSubmit);
+            if(waitlistForm) waitlistForm.addEventListener("submit", (e) => handleWaitlistSubmit(e, emailInput, submitButton, messageBox));
+            if(bottomWaitlistForm) bottomWaitlistForm.addEventListener("submit", (e) => handleWaitlistSubmit(e, bottomEmailInput, bottomSubmitButton, bottomMessageBox));
 
-            // --- Initialize ---
             initFirebase();
         </script>
 
-        <!-- Header -->
-        <header class="bg-slate-900 text-white">
-            <nav
-                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20"
-            >
-                <a href="#" class="flex items-center space-x-3">
-                    <img
-                        src="logo.png"
-                        alt="Forge Manufacturing logo"
-                        class="h-8 w-8 rounded"
-                    />
-                    <span class="text-2xl font-bold"
-                        >Forge<span class="text-blue-500"
-                            >Manufacturing</span
-                        ></span
-                    >
+        <!-- Navbar -->
+        <header class="fixed w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
+                <a href="#" class="flex items-center space-x-3 group">
+                    <img src="logo.png" alt="Forge Logo" class="h-8 w-8 rounded bg-slate-800 group-hover:ring-2 ring-blue-500 transition-all" />
+                    <span class="text-xl font-bold tracking-tight text-white">Forge<span class="text-blue-500">Compliance</span></span>
                 </a>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a
-                        href="#product"
-                        class="text-slate-300 hover:text-white transition-colors"
-                        >Product</a
-                    >
-                    <a
-                        href="#team"
-                        class="text-slate-300 hover:text-white transition-colors"
-                        >Team</a
-                    >
-                    <a
-                        href="#signup"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
-                    >
-                        Join Waitlist
-                    </a>
-                </div>
-                <!-- Mobile menu button (optional) -->
-                <div class="md:hidden">
-                    <a
-                        href="#signup"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
-                    >
-                        Sign Up
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Platform</a>
+                    <a href="#how-it-works" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">How it Works</a>
+                    <a href="#team" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Team</a>
+                    <a href="#signup" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2 px-4 rounded-full transition-all shadow-lg shadow-blue-900/20">
+                        Get Compliant
                     </a>
                 </div>
             </nav>
         </header>
 
-        <!-- Main Content -->
         <main>
             <!-- Hero Section -->
-            <section class="bg-slate-900 text-white pt-20 pb-32">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1
-                        class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight"
-                    >
-                        Advanced Testing Equipment for Electronics Manufacturing
+            <section class="relative pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden bg-gradient-dark">
+                <!-- Decorative background blobs -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 pointer-events-none">
+                    <div class="absolute top-20 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+                    <div class="absolute top-40 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+                </div>
+
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div class="inline-flex items-center space-x-2 bg-slate-900/50 border border-slate-700/50 rounded-full px-4 py-1.5 mb-8 animate-fade-in">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        <span class="text-xs font-medium text-slate-300">Accepting Early Access Pilots</span>
+                    </div>
+
+                    <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-8 animate-fade-in animate-delay-100">
+                        Compliance in Days.<br />
+                        <span class="text-gradient">Contracts Forever.</span>
                     </h1>
-                    <p
-                        class="mt-6 text-lg md:text-xl text-slate-300 max-w-3xl mx-auto"
-                    >
-                        Forge Manufacturing develops specialized testing
-                        equipment for electronics manufacturers, enabling faster
-                        product development cycles and higher quality assurance
-                        for critical components.
+
+                    <p class="mt-4 text-xl text-slate-300 max-w-2xl mx-auto mb-10 animate-fade-in animate-delay-200">
+                        The AI-powered CMMC 2.0 engine for high-mix manufacturers.
+                        We integrate with <span class="text-white font-semibold">Xometry</span> to automate documentation
+                        so you can stop pushing paper and start winning defense contracts.
                     </p>
-                    <a
-                        href="#signup"
-                        class="mt-10 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-colors"
-                    >
-                        Request Early Access
-                    </a>
-                </div>
-            </section>
 
-            <!-- Problem Section -->
-            <section class="bg-white py-24 sm:py-32">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="max-w-3xl mx-auto">
-                        <h2
-                            class="text-base font-semibold leading-7 text-blue-600"
-                        >
-                            The Problem
-                        </h2>
-                        <p
-                            class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-                        >
-                            The Testing Challenge
-                        </p>
-                        <p class="mt-6 text-lg leading-8 text-gray-700">
-                            Electronics manufacturers face significant
-                            challenges when developing and testing new products.
-                            Existing testing solutions are often
-                            <strong>costly, inflexible, and slow</strong>,
-                            creating bottlenecks in product development and
-                            quality assurance processes.
-                        </p>
-                        <p class="mt-6 text-lg leading-8 text-gray-600">
-                            Electronics manufacturers need specialized testing
-                            equipment that can adapt to rapidly changing
-                            requirements. Off-the-shelf solutions often lack the
-                            flexibility needed for custom components, while
-                            custom-built equipment requires significant
-                            investment and development time.
-                        </p>
-                        <p class="mt-6 text-lg leading-8 text-gray-600">
-                            The result is a brittle industrial base concentrated
-                            among a few large suppliers, limiting the resilience
-                            of US-based supply chains.
-                        </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in animate-delay-300">
+                        <form id="waitlist-form" class="flex flex-col sm:flex-row gap-2 w-full max-w-md">
+                            <input type="email" id="email-input" required placeholder="work@company.com"
+                                class="flex-auto rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                            <button type="submit" id="submit-button" class="flex-none rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/25 glow-effect">
+                                Request Access
+                            </button>
+                        </form>
                     </div>
-                </div>
-            </section>
+                    <div id="message-box" class="hidden max-w-md mx-auto mt-4"></div>
 
-            <!-- Product Section -->
-            <section id="product" class="bg-slate-50 py-24 sm:py-32">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center">
-                        <h2
-                            class="text-base font-semibold leading-7 text-blue-600"
-                        >
-                            Our Solution
-                        </h2>
-                        <p
-                            class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-                        >
-                            Precision Testing. Faster Development.
-                        </p>
-                        <p
-                            class="mt-6 text-lg leading-8 text-gray-700 max-w-3xl mx-auto"
-                        >
-                            We're developing modular testing equipment
-                            specifically designed for electronics manufacturers,
-                            enabling rapid prototyping, comprehensive
-                            validation, and seamless integration with existing
-                            production workflows.
-                        </p>
-                    </div>
-
-                    <!-- Product Demo/Features -->
-                    <div class="space-y-16 m-16">
-                        <!-- Product Demo -->
-                        <div
-                            class="bg-slate-800 rounded-lg shadow-xl p-8 lg:p-12 items-center"
-                        >
-                            <h3 class="text-2xl font-bold text-white mb-4">
-                                Testing Equipment Demo
-                            </h3>
-                            <p class="text-slate-300 mb-6">
-                                Our modular testing platform enables electronics
-                                manufacturers to rapidly validate components and
-                                assemblies, reducing development time and
-                                improving product quality.
-                            </p>
-                            <div
-                                style="
-                                    position: relative;
-                                    width: 100%;
-                                    padding-top: 56.25%;
-                                    overflow: hidden;
-                                "
-                            >
-                                <iframe
-                                    src="https://drive.google.com/file/d/1uiAKM4BhNahKROfD36B6gCQ_y0V6KLXA/preview"
-                                    allow="autoplay"
-                                    style="
-                                        position: absolute;
-                                        top: 0;
-                                        left: 0;
-                                        width: 100%;
-                                        height: 100%;
-                                        border: 0;
-                                    "
-                                ></iframe>
+                    <!-- Hero Visual / Dashboard Mockup -->
+                    <div class="mt-20 relative mx-auto max-w-5xl animate-fade-in animate-delay-300">
+                        <div class="rounded-xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden relative">
+                            <!-- Fake Browser Header -->
+                            <div class="h-8 bg-slate-800 flex items-center px-4 space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                            </div>
+                            <!-- Dashboard Content -->
+                            <div class="p-6 grid grid-cols-12 gap-6 bg-slate-900/50 backdrop-blur-sm">
+                                <!-- Sidebar -->
+                                <div class="col-span-2 hidden md:block space-y-4">
+                                    <div class="h-2 w-20 bg-slate-700 rounded mb-6"></div>
+                                    <div class="h-2 w-full bg-slate-800 rounded"></div>
+                                    <div class="h-2 w-full bg-blue-600/20 rounded"></div>
+                                    <div class="h-2 w-full bg-slate-800 rounded"></div>
+                                </div>
+                                <!-- Main Area -->
+                                <div class="col-span-12 md:col-span-10 space-y-6">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="h-4 w-32 bg-slate-700 rounded mb-2"></div>
+                                            <div class="h-8 w-64 bg-slate-600 rounded"></div>
+                                        </div>
+                                        <div class="bg-green-900/30 text-green-400 px-3 py-1 rounded-full text-xs border border-green-800">
+                                            Compliance Score: 92%
+                                        </div>
+                                    </div>
+                                    <!-- Grid of Cards -->
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50 relative overflow-hidden group">
+                                            <div class="h-2 w-16 bg-slate-600 rounded mb-3"></div>
+                                            <div class="h-6 w-8 bg-slate-700 rounded mb-2"></div>
+                                            <div class="scan-line"></div> <!-- Scanning animation -->
+                                            <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        </div>
+                                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                                            <div class="h-2 w-24 bg-slate-600 rounded mb-3"></div>
+                                            <div class="h-6 w-12 bg-slate-700 rounded mb-2"></div>
+                                        </div>
+                                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                                            <div class="h-2 w-20 bg-slate-600 rounded mb-3"></div>
+                                            <div class="h-6 w-10 bg-slate-700 rounded mb-2"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Table Mockup -->
+                                    <div class="bg-slate-800/30 rounded-lg border border-slate-700/50 p-4 space-y-3">
+                                        <div class="flex space-x-4 border-b border-slate-700 pb-2">
+                                            <div class="h-2 w-1/4 bg-slate-600 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-600 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-600 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-600 rounded"></div>
+                                        </div>
+                                        <div class="flex space-x-4 items-center">
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-green-500/20 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                        </div>
+                                        <div class="flex space-x-4 items-center">
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-yellow-500/20 rounded"></div>
+                                            <div class="h-2 w-1/4 bg-slate-700 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-teal-400 rounded-xl opacity-20 blur-xl -z-10"></div>
+                    </div>
+                </div>
+            </section>
 
-                        <!-- Key Features -->
-                        <div class="space-y-10">
-                            <div class="flex">
-                                <!-- Icon -->
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white"
-                                    >
-                                        <!-- Heroicon: document-text -->
-                                        <svg
-                                            class="h-6 w-6"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                                            />
-                                        </svg>
-                                    </div>
+            <!-- Social Proof -->
+            <section class="border-y border-slate-800 bg-slate-950 py-10">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <p class="text-sm font-medium text-slate-500 mb-6 uppercase tracking-wider">Trusted by innovative manufacturers</p>
+                    <div class="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                        <!-- Placeholder Logos -->
+                        <div class="h-8 w-24 bg-slate-700 rounded"></div>
+                        <div class="h-8 w-24 bg-slate-700 rounded"></div>
+                        <div class="h-8 w-24 bg-slate-700 rounded"></div>
+                        <div class="h-8 w-24 bg-slate-700 rounded"></div>
+                        <div class="h-8 w-24 bg-slate-700 rounded"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features / Value Prop -->
+            <section id="features" class="py-24 bg-slate-900 relative">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-16">
+                        <h2 class="text-blue-500 font-semibold tracking-wide uppercase text-sm">The Platform</h2>
+                        <p class="mt-2 text-3xl md:text-4xl font-bold text-white tracking-tight">
+                            Automated Compliance.<br />Human Assurance.
+                        </p>
+                        <p class="mt-4 text-slate-300 text-lg">
+                            Forge combines autonomous AI agents with expert engineering oversight to deliver a compliance program that actually works for high-mix shops.
+                        </p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- Card 1 -->
+                        <div class="card-gradient p-8 rounded-2xl group hover:-translate-y-1 transition-transform duration-300">
+                            <div class="h-12 w-12 bg-blue-900/50 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-600 transition-colors">
+                                <svg class="h-6 w-6 text-blue-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Xometry & MRP Integration</h3>
+                            <p class="text-slate-300 leading-relaxed">
+                                Connect directly to your MRP. We pull part data, process specs, and order history automatically. No more manual data entry or "checkbox" fatigue.
+                            </p>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="card-gradient p-8 rounded-2xl group hover:-translate-y-1 transition-transform duration-300">
+                            <div class="h-12 w-12 bg-teal-900/50 rounded-lg flex items-center justify-center mb-6 group-hover:bg-teal-500 transition-colors">
+                                <svg class="h-6 w-6 text-teal-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">AI CMMC Gap Analysis</h3>
+                            <p class="text-slate-300 leading-relaxed">
+                                Our AI agents scan your documents and workflows against CMMC 2.0 controls 24/7. Identify gaps instantly and get auto-generated remediation plans.
+                            </p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="card-gradient p-8 rounded-2xl group hover:-translate-y-1 transition-transform duration-300">
+                            <div class="h-12 w-12 bg-purple-900/50 rounded-lg flex items-center justify-center mb-6 group-hover:bg-purple-600 transition-colors">
+                                <svg class="h-6 w-6 text-purple-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-3">Revenue Generation</h3>
+                            <p class="text-slate-300 leading-relaxed">
+                                Don't just survive an audit—monetize it. We flag high-value defense contracts you're newly qualified for and help you submit winning bids.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- "How it Works" / AI Section -->
+            <section id="how-it-works" class="py-24 bg-slate-950 overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-3xl font-bold text-white mb-6">
+                            AI that acts like an <br />
+                            <span class="text-gradient">expert engineer.</span>
+                        </h2>
+                        <div class="space-y-8">
+                            <div class="flex gap-4">
+                                <div class="flex-none pt-1">
+                                    <span class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">1</span>
                                 </div>
-                                <div class="ml-4">
-                                    <dt
-                                        class="text-lg leading-6 font-bold text-gray-900"
-                                    >
-                                        Modular Testing Platform
-                                    </dt>
-                                    <dd class="mt-2 text-base text-gray-600">
-                                        Our flexible testing equipment adapts to
-                                        your specific needs. From PCB validation
-                                        to component stress testing, our modular
-                                        system grows with your production
-                                        requirements.
-                                    </dd>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white">Ingest & Map</h4>
+                                    <p class="text-slate-300 mt-2">Upload your SOPs, quality manuals, and network diagrams. Our AI maps them to specific NIST 800-171 controls.</p>
                                 </div>
                             </div>
-                            <div class="flex">
-                                <!-- Icon -->
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white"
-                                    >
-                                        <!-- Heroicon: shield-check -->
-                                        <svg
-                                            class="h-6 w-6"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.314-.213-2.622-.602-3.852A11.959 11.959 0 0115 2.714v.001z"
-                                            />
-                                        </svg>
-                                    </div>
+                            <div class="flex gap-4">
+                                <div class="flex-none pt-1">
+                                    <span class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">2</span>
                                 </div>
-                                <div class="ml-4">
-                                    <dt
-                                        class="text-lg leading-6 font-bold text-gray-900"
-                                    >
-                                        Automated Test Sequences
-                                    </dt>
-                                    <dd class="mt-2 text-base text-gray-600">
-                                        Program custom test sequences once and
-                                        run them consistently across production
-                                        batches. Our software interface makes
-                                        complex testing protocols simple to
-                                        implement and execute.
-                                    </dd>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white">Detect & Alert</h4>
+                                    <p class="text-slate-300 mt-2">The system continuously monitors for drift. New employee? New server? Forge alerts you if compliance is at risk.</p>
                                 </div>
                             </div>
-                            <div class="flex">
-                                <!-- Icon -->
-                                <div class="flex-shrink-0">
-                                    <div
-                                        class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white"
-                                    >
-                                        <!-- Heroicon: rocket-launch -->
-                                        <svg
-                                            class="h-6 w-6"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15.59 14.37a6 6 0 01-5.84 7.38v.01l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-1.13-1.13a1.13 1.13 0 01-1.6 1.6l-.01-.01a6 6 0 017.38-5.84l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l1.13 1.13a1.13 1.13 0 011.6-1.6l.01.01z"
-                                            />
-                                        </svg>
-                                    </div>
+                            <div class="flex gap-4">
+                                <div class="flex-none pt-1">
+                                    <span class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">3</span>
                                 </div>
-                                <div class="ml-4">
-                                    <dt
-                                        class="text-lg leading-6 font-bold text-gray-900"
-                                    >
-                                        Real-Time Analytics
-                                    </dt>
-                                    <dd class="mt-2 text-base text-gray-600">
-                                        Get immediate insights into test results
-                                        with our analytics dashboard. Identify
-                                        trends, spot failures early, and make
-                                        data-driven decisions to improve product
-                                        quality.
-                                    </dd>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white">Verify & Close</h4>
+                                    <p class="text-slate-300 mt-2">Human engineers verify critical AI outputs. You get a "ready-to-audit" package that auditors trust.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Side -->
+                    <div class="lg:w-1/2 relative">
+                        <div class="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full"></div>
+                        <div class="relative bg-slate-900 border border-slate-700 rounded-xl p-6 shadow-2xl">
+                            <div class="font-mono text-sm text-slate-300 space-y-2">
+                                <div class="flex items-center space-x-2 text-green-400">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    <span>Control 3.1.1 (Access Control) - <span class="text-white font-bold">VERIFIED</span></span>
+                                </div>
+                                <div class="pl-6 text-slate-500 text-xs border-l border-slate-700">
+                                    Evidence: Active Directory logs match policy document v2.1.
+                                </div>
+
+                                <div class="flex items-center space-x-2 text-yellow-400 mt-4">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span>Control 3.5.2 (Identification) - <span class="text-white font-bold">ACTION REQUIRED</span></span>
+                                </div>
+                                <div class="pl-6 text-slate-400 text-xs border-l border-slate-700 bg-slate-800/50 p-2 rounded mt-1">
+                                    <span class="text-blue-400">AI Insight:</span> 2 devices found on network 'ShopFloor_WiFi' without MAC address whitelisting.
+                                </div>
+
+                                <div class="flex items-center space-x-2 text-green-400 mt-4">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    <span>Control 3.14.1 (System Integrity) - <span class="text-white font-bold">VERIFIED</span></span>
                                 </div>
                             </div>
                         </div>
@@ -482,204 +437,66 @@
             </section>
 
             <!-- Team Section -->
-            <section id="team" class="bg-white py-24 sm:py-32">
+            <section id="team" class="py-24 bg-slate-900 border-t border-slate-800">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center">
-                        <h2
-                            class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-                        >
-                            Meet Our Team
-                        </h2>
-                        <p
-                            class="mt-4 text-lg leading-8 text-gray-700 max-w-3xl mx-auto"
-                        >
-                            We are a team of engineers, entrepreneurs, and
-                            product leaders from Harvard's MS/MBA program,
-                            united by a mission to strengthen America's
-                            industrial and defense capabilities.
-                        </p>
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-white">Built by Engineers & Operators</h2>
+                        <p class="mt-4 text-slate-400">Harvard MS/MBA alumni with deep experience in AI, Manufacturing, and Defense.</p>
                     </div>
-                    <div
-                        class="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-                    >
-                        <!-- Team Member Card: Nathan Alam -->
-                        <div class="bg-slate-50 rounded-lg shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-900">
-                                Nathan Alam
-                            </h3>
-                            <p class="text-sm font-semibold text-blue-600 mb-3">
-                                AI & Engineering
-                            </p>
-                            <p class="text-sm text-gray-600 mb-4">
-                                Brings a unique blend of engineering rigor and
-                                AI-driven innovation, having built custom AI
-                                agent platforms for national security
-                                applications and developed high-performance
-                                networking drivers for satellite communications
-                                at Amazon. His background in chemical and
-                                biological engineering, coupled with computer
-                                science and health policy minors, positions him
-                                to bridge technical execution with strategic,
-                                cross-functional problem-solving.
-                            </p>
-                            <a
-                                href="https://www.linkedin.com/in/nathan-alam"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-800"
-                            >
-                                LinkedIn &rarr;
-                            </a>
-                        </div>
 
-                        <!-- Team Member Card: Tyler Mangini -->
-                        <div class="bg-slate-50 rounded-lg shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-900">
-                                Tyler Mangini
-                            </h3>
-                            <p class="text-sm font-semibold text-blue-600 mb-3">
-                                Product & Strategy
-                            </p>
-                            <p class="text-sm text-gray-600 mb-4">
-                                A dual-degree engineering and business leader
-                                with deep experience in product strategy,
-                                sustainability, and data-driven innovation —
-                                having led product teams at Amazon and shaped AI
-                                strategies at Activate. His background in
-                                mechanical engineering and business management,
-                                combined with his work in climate-focused
-                                product development and regulatory strategy,
-                                makes him a natural leader in ventures requiring
-                                both technical execution and market-driven
-                                business acumen.
-                            </p>
-                            <a
-                                href="https://www.linkedin.com/in/tyler-mangini/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-800"
-                            >
-                                LinkedIn &rarr;
-                            </a>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Member 1 -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-blue-500/50 transition-colors">
+                            <h3 class="text-lg font-bold text-white">Nathan Alam</h3>
+                            <p class="text-blue-400 text-sm mb-4">AI & Engineering</p>
+                            <p class="text-slate-300 text-sm">Ex-Amazon. Built custom AI agents for national security. Expert in high-performance networking.</p>
                         </div>
-
-                        <!-- Team Member Card: Arshaan Ali -->
-                        <div class="bg-slate-50 rounded-lg shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-900">
-                                Arshaan Ali
-                            </h3>
-                            <p class="text-sm font-semibold text-blue-600 mb-3">
-                                Deep Tech & Manufacturing
-                            </p>
-                            <p class="text-sm text-gray-600 mb-4">
-                                A deep-tech entrepreneur and process engineer
-                                with a track record of scaling manufacturing
-                                systems at Tesla and founding a deep-tech
-                                startup from the ground up. His hands-on
-                                experience in battery development, electrode
-                                manufacturing, and factory layout design gives
-                                him exceptional insight into operational
-                                efficiency, supply chain strategy, and
-                                commercialization. He’s skilled at translating
-                                technical breakthroughs into scalable business
-                                models.
-                            </p>
-                            <a
-                                href="https://www.linkedin.com/in/arshaan-ali"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-800"
-                            >
-                                LinkedIn &rarr;
-                            </a>
+                        <!-- Member 2 -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-blue-500/50 transition-colors">
+                            <h3 class="text-lg font-bold text-white">Tyler Mangini</h3>
+                            <p class="text-blue-400 text-sm mb-4">Product & Strategy</p>
+                            <p class="text-slate-300 text-sm">Ex-Amazon Product Lead. Specialized in regulatory strategy and data-driven innovation.</p>
                         </div>
-
-                        <!-- Team Member Card: Trevor O’Leary -->
-                        <div class="bg-slate-50 rounded-lg shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-900">
-                                Trevor O’Leary
-                            </h3>
-                            <p class="text-sm font-semibold text-blue-600 mb-3">
-                                Hardware & Software Systems
-                            </p>
-                            <p class="text-sm text-gray-600 mb-4">
-                                Combines hardware engineering, software
-                                development, and creative project execution. As
-                                a senior software engineer at Tesla and lead
-                                electronics designer at Formula Electric, he’s
-                                built embedded systems, automated test
-                                infrastructure, and custom hardware for
-                                automotive and robotics applications. His
-                                passion for prototyping, music production, and
-                                art reflects a creative, iterative mindset —
-                                ideal for ventures that require both technical
-                                precision and innovative design.
-                            </p>
-                            <a
-                                href="https://www.linkedin.com/in/trevor-oleary"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-800"
-                            >
-                                LinkedIn &rarr;
-                            </a>
+                        <!-- Member 3 -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-blue-500/50 transition-colors">
+                            <h3 class="text-lg font-bold text-white">Arshaan Ali</h3>
+                            <p class="text-blue-400 text-sm mb-4">Deep Tech & Ops</p>
+                            <p class="text-slate-300 text-sm">Ex-Tesla Process Engineer. Scaled battery manufacturing and factory layouts.</p>
+                        </div>
+                        <!-- Member 4 -->
+                        <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-blue-500/50 transition-colors">
+                            <h3 class="text-lg font-bold text-white">Trevor O’Leary</h3>
+                            <p class="text-blue-400 text-sm mb-4">Hardware & Systems</p>
+                            <p class="text-slate-300 text-sm">Ex-Tesla Senior SWE. Built embedded systems and automated test infrastructure.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Sign-up Section -->
-            <section id="signup" class="bg-slate-900 py-24 sm:py-32">
-                <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2
-                        class="text-3xl font-bold tracking-tight text-white sm:text-4xl"
-                    >
-                        Test With Precision. Accelerate Innovation.
-                    </h2>
-                    <p class="mt-4 text-lg leading-8 text-slate-300">
-                        We're launching our pilot program with select
-                        electronics manufacturers. Sign up to receive updates
-                        and request early access to the Forge Manufacturing
-                        testing platform.
+            <!-- Bottom CTA -->
+            <section id="signup" class="py-24 relative overflow-hidden bg-slate-950">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent"></div>
+                <div class="max-w-3xl mx-auto px-4 text-center relative z-10">
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Stop Worrying About Audits.</h2>
+                    <p class="text-xl text-slate-300 mb-10">
+                        Join the pilot program. Get compliant, get secure, and get back to building.
                     </p>
 
-                    <!-- Message Box -->
-                    <div id="message-box" class="hidden mt-6"></div>
-
-                    <!-- Sign-up Form -->
-                    <form
-                        id="waitlist-form"
-                        class="mt-10 flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
-                    >
-                        <label for="email-input" class="sr-only"
-                            >Email address</label
-                        >
-                        <input
-                            type="email"
-                            id="email-input"
-                            name="email"
-                            required
-                            class="flex-auto rounded-md border-0 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                            placeholder="Enter your work email"
-                        />
-                        <button
-                            type="submit"
-                            id="submit-button"
-                            class="flex-none rounded-md bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors disabled:opacity-50"
-                        >
-                            Request Access
+                    <form id="waitlist-form-bottom" class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                        <input type="email" id="email-input-bottom" required placeholder="Enter your work email"
+                            class="flex-auto rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <button type="submit" id="submit-button-bottom" class="flex-none rounded-lg bg-white text-slate-900 px-8 py-3 font-bold hover:bg-slate-200 transition-colors">
+                            Join Waitlist
                         </button>
                     </form>
+                    <div id="message-box-bottom" class="hidden mt-4"></div>
                 </div>
             </section>
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-slate-900 border-t border-slate-700">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <p class="text-center text-sm text-slate-400">
-                    &copy; 2025 Forge Manufacturing. All rights reserved.
-                </p>
+        <footer class="bg-slate-950 border-t border-slate-900 py-12">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <p class="text-slate-500 text-sm">&copy; 2025 Forge Compliance. All rights reserved.</p>
             </div>
         </footer>
     </body>
